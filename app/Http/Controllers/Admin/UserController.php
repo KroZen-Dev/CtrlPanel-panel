@@ -151,6 +151,7 @@ class UserController extends Controller
         $this->checkPermission(self::READ_PERMISSION);
 
         $users = QueryBuilder::for(User::query())
+            ->with(['servers.product', 'notifications', 'payments', 'vouchers.users', 'roles.permissions', 'discordUser'])
             ->allowedFilters(['id', 'name', 'pterodactyl_id', 'email'])
             ->paginate(25);
 
@@ -496,7 +497,7 @@ class UserController extends Controller
     {
         $this->checkPermission(self::READ_PERMISSION);
 
-        $query = User::with('discordUser')
+        $query = User::with(['discordUser', 'roles'])
             ->withCount('servers')
             ->leftJoin('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
             ->leftJoin('roles', 'model_has_roles.role_id', '=', 'roles.id')

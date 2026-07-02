@@ -111,8 +111,7 @@ class ServerCreationService
             if ($creditsReserved) {
                 if ($server) {
                     if ($server->status !== Server::STATUS_ACTIVE && $server->status !== Server::STATUS_FAILED) {
-                        $server->update(['status' => Server::STATUS_PENDING_RECONCILIATION]);
-                        dispatch(new ReconcileServerCreationJob($server->id, $credits));
+                        return $this->handleProvisionUncertain($server, $credits, $e);
                     }
                 } else {
                     $this->refundCredits($user, $credits);
@@ -270,10 +269,7 @@ class ServerCreationService
                 return $server;
             }
 
-            $server->update(['status' => Server::STATUS_PENDING_RECONCILIATION]);
-            dispatch(new ReconcileServerCreationJob($server->id, $chargedPrice));
-
-            return $server;
+            return $this->handleProvisionUncertain($server, $chargedPrice, new \Exception('Pterodactyl returned error status: ' . $remoteResponse->status()));
         } catch (\Throwable $e) {
             return $this->handleProvisionUncertain($server, $chargedPrice, $e);
         }

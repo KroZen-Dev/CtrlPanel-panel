@@ -40,9 +40,17 @@ class Product extends Model
         'default_billing_priority_label',
     ];
 
-    protected $casts = [
-        'default_billing_priority' => BillingPriority::class
-    ];
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'default_billing_priority' => BillingPriority::class
+        ];
+    }
 
     public static function boot()
     {

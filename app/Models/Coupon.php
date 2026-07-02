@@ -59,14 +59,17 @@ class Coupon extends Model
     /**
      * @var string[]
      */
-    protected $casts = [
-        'value' => 'float',
-        'min_product_price' => 'float',
-        'uses' => 'integer',
-        'max_uses' => 'integer',
-        'max_uses_per_user' => 'integer',
-        'expires_at' => 'timestamp'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'value' => 'float',
+            'min_product_price' => 'float',
+            'uses' => 'integer',
+            'max_uses' => 'integer',
+            'max_uses_per_user' => 'integer',
+            'expires_at' => 'timestamp'
+        ];
+    }
 
     public static function boot()
     {
@@ -168,9 +171,7 @@ class Coupon extends Model
      */
     public function pendingUses(): int
     {
-        return Payment::where('coupon_code', $this->code)
-            ->whereIn('status', [PaymentStatus::OPEN, PaymentStatus::PROCESSING])
-            ->count();
+        return $this->pendingPayments()->count();
     }
 
     /**
@@ -199,5 +200,14 @@ class Coupon extends Model
     public function users()
     {
         return $this->belongsToMany(User::class, 'user_coupons');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function pendingPayments()
+    {
+        return $this->hasMany(Payment::class, 'coupon_code', 'code')
+            ->whereIn('status', [PaymentStatus::OPEN, PaymentStatus::PROCESSING]);
     }
 }

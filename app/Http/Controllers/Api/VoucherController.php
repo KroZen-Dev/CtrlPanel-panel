@@ -45,6 +45,7 @@ class VoucherController extends Controller
     public function index(Request $request)
     {
         $vouchers = QueryBuilder::for(Voucher::class)
+            ->with(['users'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->allowedFilters(self::ALLOWED_FILTERS)
             ->paginate($request->input('per_page') ?? 50);
@@ -113,6 +114,7 @@ class VoucherController extends Controller
     public function show(Request $request, int $voucher)
     {
         $voucherQuery = QueryBuilder::for(Voucher::class)
+            ->with(['users'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->where('id', $voucher)
             ->firstOrFail();

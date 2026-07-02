@@ -123,7 +123,7 @@ class PartnerController extends Controller
     {
         $this->checkAnyPermission([self::WRITE_PERMISSION,self::READ_PERMISSION]);
 
-        $query = PartnerDiscount::query();
+        $query = PartnerDiscount::with('user');
 
         return datatables($query)
             ->addColumn('actions', function (PartnerDiscount $partner) {
@@ -137,7 +137,7 @@ class PartnerController extends Controller
                 ';
             })
             ->addColumn('user', function (PartnerDiscount $partner) {
-                return ($user = User::where('id', $partner->user_id)->first()) ? '<a href="'.route('admin.users.show', $partner->user_id) . '">' . $user->name . '</a>' : __('Unknown user');
+                return ($partner->user) ? '<a href="'.route('admin.users.show', $partner->user_id) . '">' . $partner->user->name . '</a>' : __('Unknown user');
             })
             ->editColumn('created_at', function (PartnerDiscount $partner) {
                 return $partner->created_at ? $partner->created_at->diffForHumans() : '';

@@ -75,12 +75,15 @@ class Server extends Model
     /**
      * @var string[]
      */
-    protected $casts = [
-        'suspended' => 'datetime',
-        'last_billed' => 'datetime',
-        'canceled' => 'datetime',
-        'billing_priority' => BillingPriority::class
-    ];
+    protected function casts(): array
+    {
+        return [
+            'suspended' => 'datetime',
+            'last_billed' => 'datetime',
+            'canceled' => 'datetime',
+            'billing_priority' => BillingPriority::class
+        ];
+    }
 
     public function __construct()
     {

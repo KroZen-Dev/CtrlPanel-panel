@@ -235,7 +235,7 @@ class ProductController extends Controller
     {
         $this->checkPermission(self::READ_PERMISSION);
 
-        $query = Product::with(['servers']);
+        $query = Product::withCount(['servers', 'nodes', 'eggs']);
 
         return datatables($query)
             ->addColumn('actions', function (Product $product) {
@@ -253,13 +253,13 @@ class ProductController extends Controller
             })
 
             ->addColumn('servers', function (Product $product) {
-                return $product->servers()->count();
+                return $product->servers_count;
             })
             ->addColumn('nodes', function (Product $product) {
-                return $product->nodes()->count();
+                return $product->nodes_count;
             })
             ->addColumn('eggs', function (Product $product) {
-                return $product->eggs()->count();
+                return $product->eggs_count;
             })
             ->editColumn('disabled', function (Product $product) {
                 $checked = $product->disabled == false ? 'checked' : '';

@@ -16,9 +16,12 @@ class ApplicationApi extends Model
 
     public $incrementing = false;
 
-    protected $casts = [
-        'last_used' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'last_used' => 'datetime',
+        ];
+    }
 
     public static function boot()
     {

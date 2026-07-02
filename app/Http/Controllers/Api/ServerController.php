@@ -77,6 +77,7 @@ class ServerController extends Controller
     public function index(Request $request)
     {
         $servers = QueryBuilder::for(Server::class)
+            ->with(['product', 'user'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->allowedFilters([
                 AllowedFilter::exact('suspended')->nullable(),
@@ -120,6 +121,7 @@ class ServerController extends Controller
     public function show(Request $request, string $serverId)
     {
         $server = QueryBuilder::for(Server::class)
+            ->with(['product', 'user'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->where('id', $serverId)
             ->firstOrFail();

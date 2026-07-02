@@ -70,12 +70,15 @@ class Voucher extends Model
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @return array<string, string>
      */
-    protected $casts = [
-        'expires_at' => 'datetime',
-        'uses' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'expires_at' => 'datetime',
+            'uses' => 'integer',
+        ];
+    }
 
     /**
      * @var string[]

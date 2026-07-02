@@ -232,7 +232,7 @@ class CouponController extends Controller
     {
         $this->checkAnyPermission([self::WRITE_PERMISSION, self::READ_PERMISSION]);
 
-        $query = Coupon::query();
+        $query = Coupon::query()->withCount('pendingPayments');
 
         return datatables($query)
             ->addColumn('actions', function (Coupon $coupon) {
@@ -262,7 +262,7 @@ class CouponController extends Controller
             })
             ->editColumn('uses', function (Coupon $coupon) {
                 $maxUses = $coupon->max_uses == -1 ? '∞' : $coupon->max_uses;
-                $pending = $coupon->pendingUses();
+                $pending = $coupon->pending_payments_count;
                 $pendingText = $pending > 0 ? " (+{$pending})" : "";
 
                 return "{$coupon->uses}{$pendingText} / {$maxUses}";

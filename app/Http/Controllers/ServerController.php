@@ -245,7 +245,7 @@ class ServerController extends Controller
 
     private function getServersWithInfo(): \Illuminate\Database\Eloquent\Collection
     {
-        $servers = Auth::user()->servers;
+        $servers = Auth::user()->servers()->with(['product', 'user'])->get();
 
         foreach ($servers as $server) {
             $serverInfo = $this->pterodactyl->getServerAttributes($server->pterodactyl_id);

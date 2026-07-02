@@ -95,7 +95,6 @@ class ChargeServers extends Command
                         continue;
                     }
 
-
                     $isCanceled = $server->canceled;
                     $hasInsufficientCredits = $user->credits < $product->price && $product->price != 0;
 
@@ -107,17 +106,18 @@ class ChargeServers extends Command
                             $this->error($exception->getMessage());
                         }
                     } else {
-                        // charge credits to user
-                        $this->line("<fg=blue>{$user->name}</> Current credits: <fg=green>{$user->credits}</> Credits to be removed: <fg=red>{$product->price}</>");
+                        DB::transaction(function () use ($server, $user, $product, $newBillingDate) {
+                            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
 
-                        if ($user->credits >= $product->price) {
-                            $user->decrement('credits', $product->price);
-                            $user->refresh();
-                            // update server last_billed date in db
-                            DB::table('servers')->where('id', $server->id)->update(['last_billed' => $newBillingDate]);
-                        } else {
-                            $this->suspendFunc($server, $user);
-                        }
+                            if ($lockedUser->credits >= $product->price) {
+                                $this->line("<fg=blue>{$lockedUser->name}</> Current credits: <fg=green>{$lockedUser->credits}</> Credits to be removed: <fg=red>{$product->price}</>");
+
+                                $lockedUser->decrement('credits', $product->price);
+                                DB::table('servers')->where('id', $server->id)->update(['last_billed' => $newBillingDate]);
+                            } else {
+                                $this->suspendFunc($server, $lockedUser);
+                            }
+                        });
                     }
                 }
 

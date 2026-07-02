@@ -230,7 +230,7 @@ class VoucherController extends Controller
                 WHEN vouchers.expires_at IS NOT NULL AND vouchers.expires_at < NOW() THEN "EXPIRED"
                 ELSE "VALID"
             END as derived_status
-        ');
+        ')->withCount('users');
 
         return datatables($query)
             ->addColumn('actions', function (Voucher $voucher) {
@@ -252,7 +252,7 @@ class VoucherController extends Controller
                 return '<span class="badge badge-'.$color.'">'.$status.'</span>';
             })
             ->editColumn('uses', function (Voucher $voucher) {
-                return "{$voucher->used} / {$voucher->uses}";
+                return "{$voucher->users_count} / {$voucher->uses}";
             })
             ->editColumn('credits', function (Voucher $voucher, CurrencyHelper $currencyHelper) {
                 return $currencyHelper->formatForDisplay($voucher->credits);

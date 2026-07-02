@@ -83,6 +83,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $users = QueryBuilder::for(User::class)
+            ->with(['servers.product', 'notifications', 'payments', 'vouchers.users', 'roles.permissions', 'discordUser'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->allowedFilters(self::ALLOWED_FILTERS)
             ->paginate($request->input('per_page') ?? 50);
@@ -125,6 +126,7 @@ class UserController extends Controller
     public function show(Request $request, int $userId)
     {
         $user = QueryBuilder::for(User::class)
+            ->with(['servers.product', 'notifications', 'payments', 'vouchers.users', 'roles.permissions', 'discordUser'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->where('id', $userId)
             ->firstOrFail();
@@ -255,17 +257,24 @@ class UserController extends Controller
     {
         $data = $request->validated();
 
-        if (isset($data['credits'])) {
-            $user->increment('credits', $this->currencyHelper->prepareForDatabase($data['credits']));
+        DB::transaction(function () use ($user, $data) {
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
 
+            if (isset($data['credits'])) {
+                $lockedUser->increment('credits', $this->currencyHelper->prepareForDatabase($data['credits']));
+            }
+
+            if (isset($data['server_limit'])) {
+                $lockedUser->increment('server_limit', $data['server_limit']);
+            }
+        });
+
+        $user = $user->fresh();
+        if (isset($data['credits'])) {
             event(new UserUpdateCreditsEvent($user));
         }
 
-        if (isset($data['server_limit'])) {
-            $user->increment('server_limit', $data['server_limit']);
-        }
-
-        return UserResource::make($user->fresh());
+        return UserResource::make($user);
     }
 
     /**
@@ -303,15 +312,24 @@ class UserController extends Controller
     {
         $data = $request->validated();
 
+        DB::transaction(function () use ($user, $data) {
+            $lockedUser = User::where('id', $user->id)->lockForUpdate()->first();
+
+            if (isset($data['credits'])) {
+                $lockedUser->decrement('credits', $this->currencyHelper->prepareForDatabase($data['credits']));
+            }
+
+            if (isset($data['server_limit'])) {
+                $lockedUser->decrement('server_limit', $data['server_limit']);
+            }
+        });
+
+        $user = $user->fresh();
         if (isset($data['credits'])) {
-            $user->decrement('credits', $this->currencyHelper->prepareForDatabase($data['credits']));
+            event(new UserUpdateCreditsEvent($user));
         }
 
-        if (isset($data['server_limit'])) {
-            $user->decrement('server_limit', $data['server_limit']);
-        }
-
-        return UserResource::make($user->fresh());
+        return UserResource::make($user);
     }
 
     /**

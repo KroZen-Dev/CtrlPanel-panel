@@ -4,27 +4,31 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class CreditService
 {
 
     public function reserve(User $user, int $amount): void
     {
-        $reserved = User::where('id', $user->id)
-            ->where('credits', '>=', $amount)
-            ->decrement('credits', $amount);
+        DB::transaction(function () use ($user, $amount) {
+            $user = User::where('id', $user->id)->lockForUpdate()->first();
+            if ($user->credits < $amount) {
+                throw new \Exception('Unable to reserve credits: either insufficient balance or concurrent provisioning in progress. Please retry.');
+            }
 
-        if ($reserved === 0) {
-            // Either not enough credits or another concurrent request updated this user first.
-            throw new \Exception('Unable to reserve credits: either insufficient balance or concurrent provisioning in progress. Please retry.');
-        }
+            $user->decrement('credits', $amount);
+        });
 
         Cache::forget('user_credits_left:' . $user->id);
     }
 
     public function refund(User $user, int $amount): void
     {
-        User::where('id', $user->id)->increment('credits', $amount);
+        DB::transaction(function () use ($user, $amount) {
+            $user = User::where('id', $user->id)->lockForUpdate()->first();
+            $user->increment('credits', $amount);
+        });
 
         Cache::forget('user_credits_left:' . $user->id);
     }

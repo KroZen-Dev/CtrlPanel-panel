@@ -148,7 +148,8 @@ class TicketsController extends Controller
     {
         $this->checkAnyPermission([self::READ_PERMISSION, self::WRITE_PERMISSION]);
 
-        $query = Ticket::leftJoin('ticket_categories', 'tickets.ticketcategory_id', '=', 'ticket_categories.id')
+        $query = Ticket::with('user')
+            ->leftJoin('ticket_categories', 'tickets.ticketcategory_id', '=', 'ticket_categories.id')
             ->select(['tickets.*', 'ticket_categories.name as category_name']);
 
         return datatables($query)

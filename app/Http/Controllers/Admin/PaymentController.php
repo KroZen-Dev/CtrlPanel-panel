@@ -241,7 +241,7 @@ class PaymentController extends Controller
     {
         $this->checkPermission(self::VIEW_PERMISSION);
 
-        $query = Payment::with('user');
+        $query = Payment::with(['user', 'invoice']);
 
         return datatables($query)
 
@@ -273,11 +273,11 @@ class PaymentController extends Controller
                 ];
             })
             ->addColumn('actions', function (Payment $payment) {
-                $invoice = Invoice::where('payment_id', '=', $payment->payment_id)->first();
+                $invoice = $payment->invoice;
 
                 $actions = '';
                 if ($invoice && File::exists(storage_path('app/invoice/' . $invoice->invoice_user . '/' . $invoice->created_at->format('Y') . '/' . $invoice->invoice_name . '.pdf'))) {
-                    $actions .= '<a data-content="' . __('Download') . '" data-toggle="popover" data-trigger="hover" data-placement="top" href="' . route('admin.invoices.downloadSingleInvoice', ['id' => $payment->payment_id]) . '" class="mr-1 text-white btn btn-sm btn-info"><i class="fas fa-file-download"></i></a>';
+                    $actions .= '<a data-content="' . __('Download') . '" data-toggle="popover" data-trigger="hover" data-placement="top" href="' . route('admin.invoices.downloadSingleInvoice', ['id' => $payment->payment_id]) . '" class=" . '" class="mr-1 text-white btn btn-sm btn-info"><i class="fas fa-file-download"></i></a>';
                 }
 
                 if ($payment->status !== PaymentStatus::PAID && $payment->status !== PaymentStatus::CANCELED) {

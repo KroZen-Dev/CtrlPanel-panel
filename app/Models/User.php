@@ -87,14 +87,17 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * The attributes that should be cast to native types.
      *
-     * @var array
+     * @return array<string, string>
      */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'last_seen' => 'datetime',
-        'server_limit' => 'integer',
-        'email_verified_reward' => 'boolean'
-    ];
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'last_seen' => 'datetime',
+            'server_limit' => 'integer',
+            'email_verified_reward' => 'boolean',
+        ];
+    }
 
     public function __construct()
     {

@@ -57,6 +57,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $products = QueryBuilder::for(Product::class)
+            ->with(['nodes', 'eggs', 'servers'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->allowedFilters(self::ALLOWED_FILTERS)
             ->paginate($request->input('per_page') ?? 50);
@@ -173,6 +174,7 @@ class ProductController extends Controller
     public function show(Request $request, string $productId)
     {
         $product = QueryBuilder::for(Product::class)
+            ->with(['nodes', 'eggs', 'servers'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->where('id', $productId)
             ->firstOrFail();

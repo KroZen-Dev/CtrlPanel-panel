@@ -7,6 +7,7 @@ use Hidehalo\Nanoid\Client;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Payment extends Model
 {
@@ -38,9 +39,12 @@ class Payment extends Model
     /**
      * @var string[]
      */
-    protected $casts = [
-        'status' => PaymentStatus::class
-    ];
+    protected function casts(): array
+    {
+        return [
+            'status' => PaymentStatus::class
+        ];
+    }
 
     public static function boot()
     {
@@ -59,5 +63,13 @@ class Payment extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return HasOne
+     */
+    public function invoice()
+    {
+        return $this->hasOne(Invoice::class, 'payment_id', 'payment_id');
     }
 }

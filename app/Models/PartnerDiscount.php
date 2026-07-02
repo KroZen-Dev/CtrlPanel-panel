@@ -11,6 +11,14 @@ class PartnerDiscount extends Model
 {
     use HasFactory;
 
+    /**
+     * Get the user that owns the partner discount.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     protected $fillable = [
         'user_id',
         'partner_discount',

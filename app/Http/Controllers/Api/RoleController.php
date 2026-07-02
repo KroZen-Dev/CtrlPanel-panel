@@ -45,6 +45,7 @@ class RoleController extends Controller
     public function index(Request $request)
     {
         $roles = QueryBuilder::for(Role::class)
+            ->with(['permissions', 'users'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->allowedFilters(self::ALLOWED_FILTERS)
             ->paginate($request->input('per_page') ?? 50);
@@ -127,6 +128,7 @@ class RoleController extends Controller
     public function show(Request $request, int $roleId)
     {
         $role = QueryBuilder::for(Role::class)
+            ->with(['permissions', 'users'])
             ->allowedIncludes(self::ALLOWED_INCLUDES)
             ->where('id', $roleId)
             ->firstOrFail();
